@@ -1,0 +1,7 @@
+/* components/DashboardLayout.module.css */
+.main {
+  margin-top: var(--navbar-h);
+  margin-left: var(--sidebar-w);
+  padding: 28px;
+  min-height: calc(100vh - var(--navbar-h));
+}
