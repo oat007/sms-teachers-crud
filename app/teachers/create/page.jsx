@@ -7,6 +7,38 @@ import styles from './create-teacher.module.css'
 
 const API = process.env.NEXT_PUBLIC_API_URL
 
+// ✅ ย้ายออกมานอก component
+const Field = ({
+  id,
+  label,
+  type = 'text',
+  placeholder,
+  required,
+  form,
+  setForm,
+  errors,
+  setErrors,
+  styles,
+}) => (
+  <div className={styles.field}>
+    <label className={styles.label}>
+      {label}
+      {required && <span className={styles.req}>*</span>}
+    </label>
+    <input
+      type={type}
+      className={`${styles.input} ${errors[id] ? styles.inputError : ''}`}
+      placeholder={placeholder}
+      value={form[id]}
+      onChange={(e) => {
+        setForm((prev) => ({ ...prev, [id]: e.target.value })) // ✅ แก้ตรงนี้
+        setErrors((prev) => ({ ...prev, [id]: '' }))
+      }}
+    />
+    {errors[id] && <p className={styles.fieldError}>⚠ {errors[id]}</p>}
+  </div>
+)
+
 export default function CreateTeacherPage() {
   const router = useRouter()
   const [form, setForm] = useState({
@@ -33,11 +65,17 @@ export default function CreateTeacherPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     const errs = validate()
-    if (Object.keys(errs).length > 0) { setErrors(errs); return }
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs)
+      return
+    }
 
     setLoading(true)
     const token = localStorage.getItem('token')
-    if (!token) { router.push('/login'); return }
+    if (!token) {
+      router.push('/login')
+      return
+    }
 
     try {
       const res = await fetch(`${API}/teachers`, {
@@ -49,7 +87,10 @@ export default function CreateTeacherPage() {
         body: JSON.stringify(form),
       })
 
-      if (res.status === 401) { router.push('/login'); return }
+      if (res.status === 401) {
+        router.push('/login')
+        return
+      }
 
       if (res.ok) {
         setSuccess(true)
@@ -64,26 +105,6 @@ export default function CreateTeacherPage() {
       setLoading(false)
     }
   }
-
-  const Field = ({ id, label, type = 'text', placeholder, required }) => (
-    <div className={styles.field}>
-      <label className={styles.label}>
-        {label}
-        {required && <span className={styles.req}>*</span>}
-      </label>
-      <input
-        type={type}
-        className={`${styles.input} ${errors[id] ? styles.inputError : ''}`}
-        placeholder={placeholder}
-        value={form[id]}
-        onChange={(e) => {
-          setForm({ ...form, [id]: e.target.value })
-          setErrors({ ...errors, [id]: '' })
-        }}
-      />
-      {errors[id] && <p className={styles.fieldError}>⚠ {errors[id]}</p>}
-    </div>
-  )
 
   return (
     <DashboardLayout>
@@ -110,10 +131,10 @@ export default function CreateTeacherPage() {
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>ข้อมูลอาจารย์</h2>
             <div className={styles.grid}>
-              <Field id="teacher_no" label="รหัสอาจารย์" placeholder="เช่น T001" required />
-              <Field id="first_name" label="ชื่อ" placeholder="ชื่อจริง" required />
-              <Field id="last_name" label="นามสกุล" placeholder="นามสกุล" required />
-              <Field id="email" label="อีเมล" type="email" placeholder="example@email.com" required />
+              <Field id="teacher_no" label="รหัสอาจารย์" placeholder="เช่น T001" required form={form} setForm={setForm} errors={errors} setErrors={setErrors} styles={styles} />
+              <Field id="first_name" label="ชื่อ" placeholder="ชื่อจริง" required form={form} setForm={setForm} errors={errors} setErrors={setErrors} styles={styles} />
+              <Field id="last_name" label="นามสกุล" placeholder="นามสกุล" required form={form} setForm={setForm} errors={errors} setErrors={setErrors} styles={styles} />
+              <Field id="email" label="อีเมล" type="email" placeholder="example@email.com" required form={form} setForm={setForm} errors={errors} setErrors={setErrors} styles={styles} />
             </div>
 
             <div className={styles.field}>
@@ -121,7 +142,9 @@ export default function CreateTeacherPage() {
               <select
                 className={styles.input}
                 value={form.status}
-                onChange={(e) => setForm({ ...form, status: e.target.value })}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, status: e.target.value }))
+                }
               >
                 <option value="active">ใช้งาน</option>
                 <option value="inactive">ไม่ใช้งาน</option>
